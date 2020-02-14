@@ -26,8 +26,20 @@ write_to_file(File, Text):-
     write(Stream, Text),
     close(Stream).
 
+whichLineIsOrc :-
+        o(X, _),
+        (
+            X = 0 -> (write('Orc is on 0th line'));
+            X = 1 -> (write('Orc is on 1st line'));
+            X = 2 -> (write('Orc is on 2nd line'));
+            X = 3 -> (write('Orc is on 3rd line'))
+        ).
+
 main :-
-    open('input.txt', read, Str),
-    read_file(Str,Lines),
-    close(Str),
-    iterate(Lines).
+    randomSearch.
+
+randomSearch :-
+    consult('input.pl').
+    random_between( 0, 3, X).
+    format('~d', X).
+    % o(X, _).
