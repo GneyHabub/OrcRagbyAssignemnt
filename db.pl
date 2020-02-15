@@ -2,10 +2,10 @@ ball(c(0, 0), s0).
 ball(C, do(A, S)) :- 
     ball(C0, S),
     (
-        (A = up, cellAbove(C, CN), !, noWall(CN));
-        (A = down, cellBelow(C, CN), !, noWall(CN));
-        (A = left, cellLeft(C, CN), !, noWall(CN));
-        (A = right, cellRight(C, CN), !, noWall(CN))
+        (A = up, cellAbove(C0, C), noWall(C));
+        (A = down, cellBelow(C0, C), noWall(C));
+        (A = left, cellLeft(C0, C), noWall(C));
+        (A = right, cellRight(C0, C), noWall(C))
     ).
 
 cellAbove(c(X0, Y0), c(XN, YN)) :-
@@ -21,6 +21,32 @@ noWall(c(X, Y)) :-
     (X < 4), (X >= 0),
     (Y < 5), (Y >= 0).
 
+ballNotLost(s0).
+ballNotLost(do(A, S)) :-
+    ballNotLost(S),
+    ball(C, do(A, S)),
+    \+o(C).
+
+canPass(s0).
+canPass(do(A, S)) :-
+    canPass(S);
+    A = pass -> false.
+
+touchDown(s0) :- false.
+touchDown(do(A, S)) :- 
+    (ball(C, do(A, S)),
+    t(C)).
+
+orcNearBy(S) :-
+    ball(C, S),
+    o(CN),
+    isAdjacent(C, CN).
+
+isAdjacent(C, CN) :-
+    cellRight(C, CN);
+    cellBelow(C, CN);
+    cellAbove(C, CN);
+    cellLeft(C, CN).
 
 
 
@@ -76,3 +102,9 @@ write_to_file(File, Text):-
     open(File, append, Stream),
     write(Stream, Text),
     close(Stream).
+
+%Conver to the used format
+o(c(X, Y)) :-
+    o(X, Y).
+t(c(X, Y)) :-
+    t(X, Y).
