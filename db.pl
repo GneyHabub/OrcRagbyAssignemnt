@@ -1,11 +1,39 @@
-whichLineIsOrc :-
-        o(X, _),
-        (
-            X = 0 -> (write('Orc is on 0th line'));
-            X = 1 -> (write('Orc is on 1st line'));
-            X = 2 -> (write('Orc is on 2nd line'));
-            X = 3 -> (write('Orc is on 3rd line'))
-        ).
+ball(c(0, 0), s0).
+ball(C, do(A, S)) :- 
+    ball(C0, S),
+    (
+        (A = up, cellAbove(C, CN), !, noWall(CN));
+        (A = down, cellBelow(C, CN), !, noWall(CN));
+        (A = left, cellLeft(C, CN), !, noWall(CN));
+        (A = right, cellRight(C, CN), !, noWall(CN))
+    ).
+
+cellAbove(c(X0, Y0), c(XN, YN)) :-
+    XN is X0, YN is Y0+1.
+cellBelow(c(X0, Y0), c(XN, YN)) :-
+    XN is X0, YN is Y0-1.
+cellLeft(c(X0, Y0), c(XN, YN)) :-
+    XN is X0-1, YN is Y0.
+cellRight(c(X0, Y0), c(XN, YN)) :-
+    XN is X0+1, YN is Y0.
+
+noWall(c(X, Y)) :-
+    (X < 4), (X >= 0),
+    (Y < 5), (Y >= 0).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 main :-
     randomSearch.
