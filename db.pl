@@ -1,3 +1,26 @@
+whichLineIsOrc :-
+        o(X, _),
+        (
+            X = 0 -> (write('Orc is on 0th line'));
+            X = 1 -> (write('Orc is on 1st line'));
+            X = 2 -> (write('Orc is on 2nd line'));
+            X = 3 -> (write('Orc is on 3rd line'))
+        ).
+
+main :-
+    randomSearch.
+
+randomSearch :-
+    consult('input.pl').
+    
+%HELPERS
+%Adds element to list
+add(E,L,[E|L]).
+
+%Counts number of elements in list
+countList([],0). 
+countList([_|Tail], N) :- countList(Tail, N1), N is N1 + 1.
+
 %Check if item is on the list or not
 on_list(Item,[Item|Rest]):-
     write(Item). 
@@ -25,21 +48,3 @@ write_to_file(File, Text):-
     open(File, append, Stream),
     write(Stream, Text),
     close(Stream).
-
-whichLineIsOrc :-
-        o(X, _),
-        (
-            X = 0 -> (write('Orc is on 0th line'));
-            X = 1 -> (write('Orc is on 1st line'));
-            X = 2 -> (write('Orc is on 2nd line'));
-            X = 3 -> (write('Orc is on 3rd line'))
-        ).
-
-main :-
-    randomSearch.
-
-randomSearch :-
-    consult('input.pl').
-    random_between( 0, 3, X).
-    format('~d', X).
-    % o(X, _).
