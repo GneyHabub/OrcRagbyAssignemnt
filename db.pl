@@ -18,8 +18,8 @@ cellRight(c(X0, Y0), c(XN, YN)) :-
     XN is X0+1, YN is Y0.
 
 noWall(c(X, Y)) :-
-    (X < 19), (X >= 0),
-    (Y < 19), (Y >= 0).
+    (X < 20), (X >= 0),
+    (Y < 20), (Y >= 0).
 
 notNearWall(c(X, Y)) :- 
     (X < 19), (X > 0),
@@ -77,14 +77,14 @@ randomDirection(C, AN) :-
                     random(0, 2, Dir),
                     (
                         Dir = 0 -> AN = up;
-                        Dir = 1 -> AN = rignt
+                        Dir = 1 -> AN = right
                     )
                 );
                 X = 0, Y = 19 -> (
                     random(0, 2, Dir),
                     (
                         Dir = 0 -> AN = down;
-                        Dir = 1 -> AN = rignt
+                        Dir = 1 -> AN = right
                     )
                 );
                 X = 19, Y = 19 -> (
@@ -135,10 +135,7 @@ randomDirection(C, AN) :-
                 )
             )
         )
-    ).
-
-
-    
+    ). 
     
 %HELPERS
 %Adds element to list
@@ -177,21 +174,59 @@ t(c(X, Y)) :-
 h(c(X, Y)) :-
     h(X, Y).
 
+h(0, 3).
+o(3, 2).
+o(1, 2).
+t(1, 3).
+
 main :-
     consult('input.pl').
     randomSearch.
 
-randomSearch.
-
-randomMove(ball(c(0, 0), s0), 0).
-randomMove(ball(C, do(A, S)), Count) :-
+randomSearch :- 
+    randomMove(ball(C, do(A, S0)), Count, Res),
     (
-        (A = up; A = down, A = left; A = right),
-        ball(C0, S0),
-        \+o(C),
-        \+h(C),
-        \+t(C),
-        Count is Count0 + 1,
+        Res = cont -> randomMove(ball())
+    )
+
+
+randomMove(ball(c(0, 0), s0), 0, cont).
+randomMove(ball(C, do(A, S)), Count, Res) :-
+    (
+        Res = cont,
+        randomMove(ball(C0, S0), Count0, cont),
         randomDirection(C0, A),
-        randomMove(ball(C0, S0), Count0)
+        ball(C, do(A, S0)),
+        Count is Count0 + 1,
+        (A = up; A = down; A = left; A = right),
+        \+o(C),
+        \+t(C),
+        \+h(C)
+    );
+    (
+        Res = cont,
+        randomDirection(C0, A),
+        ball(C, do(A, S0)),
+        randomMove(ball(C0, S0), Count0, cont),
+        Count is Count0 + 1,
+        (A = up; A = down; A = left; A = right),
+        o(C)
+    );
+    (
+        Res = cont,
+        randomDirection(C0, A),
+        ball(C, do(A, S0)),
+        randomMove(ball(C0, S0), Count0, cont),
+        Count is Count0,
+        (A = up; A = down; A = left; A = right),
+        h(C)
+    );
+    (
+        Res = cont,
+        randomDirection(C0, A),
+        ball(C, do(A, S0)),
+        randomMove(ball(C0, S0), Count0, cont),
+        Count is Count0 + 1,
+        (A = up; A = down; A = left; A = right),
+        t(C)
     ).
