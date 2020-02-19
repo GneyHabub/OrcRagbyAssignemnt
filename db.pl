@@ -18,8 +18,12 @@ cellRight(c(X0, Y0), c(XN, YN)) :-
     XN is X0+1, YN is Y0.
 
 noWall(c(X, Y)) :-
-    (X < 4), (X >= 0),
-    (Y < 5), (Y >= 0).
+    (X < 19), (X >= 0),
+    (Y < 19), (Y >= 0).
+
+notNearWall(c(X, Y)) :- 
+    (X < 19), (X > 0),
+    (Y < 19), (Y > 0).
 
 ballNotLost(s0).
 ballNotLost(do(A, S)) :-
@@ -42,30 +46,99 @@ orcNearBy(S) :-
     o(CN),
     isAdjacent(C, CN).
 
+visited(c(0, 0), s0).
+visited(C, do(A, S)) :- 
+    ball(C, do(A, S)); 
+    visited(C, S).
+
 isAdjacent(C, CN) :-
     cellRight(C, CN);
     cellBelow(C, CN);
     cellAbove(C, CN);
     cellLeft(C, CN).
 
+randomDirection(C, AN) :-
+    (
+        (
+            notNearWall(C),
+            random(0, 4, Dir),
+            (
+                Dir = 0 -> AN = up;
+                Dir = 1 -> AN = down;
+                Dir = 2 -> AN = left;
+                Dir = 3 -> AN = right
+            ), !
+        );
+        (
+            \+notNearWall(C),
+            C = c(X, Y),
+            (
+                X = 0, Y = 0 -> (
+                    random(0, 2, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = rignt
+                    )
+                );
+                X = 0, Y = 19 -> (
+                    random(0, 2, Dir),
+                    (
+                        Dir = 0 -> AN = down;
+                        Dir = 1 -> AN = rignt
+                    )
+                );
+                X = 19, Y = 19 -> (
+                    random(0, 2, Dir),
+                    (
+                        Dir = 0 -> AN = left;
+                        Dir = 1 -> AN = down
+                    )
+                );
+                X = 19, Y = 0 -> (
+                    random(0, 2, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = left
+                    )
+                );
+                X = 0, Y \= 0, Y \= 19 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = up, !;
+                        Dir = 1 -> AN = down, !;
+                        (Dir = 2 -> AN = right, !)
+                    )
+                );
+                X \= 0, X \= 19, Y = 0 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = up, !;
+                        Dir = 1 -> AN = left, !;
+                        (Dir = 2 -> AN = right, !)
+                    )
+                );
+                X = 19, Y \= 19, Y \= 0 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = up, !;
+                        Dir = 1 -> AN = left, !;
+                        (Dir = 2 -> AN = down, !)
+                    )
+                );
+                X \= 19, X \= 0, Y = 19 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = down, !;
+                        Dir = 1 -> AN = left, !;
+                        (Dir = 2 -> AN = right, !)
+                    )
+                )
+            )
+        )
+    ).
 
 
-
-
-
-
-
-
-
-
-
-
-
-main :-
-    randomSearch.
-
-randomSearch :-
-    consult('input.pl').
+    
     
 %HELPERS
 %Adds element to list
@@ -81,13 +154,6 @@ on_list(Item,[Item|Rest]):-
 on_list(Item,[DisregardHead|Tail]):-
     \+ Tail = [],
     on_list(Item,Tail).
-
-%Iteration
-iterate([]).
-iterate([H|T]):- 
-    write_to_file('output.txt', H), 
-    write_to_file('output.txt', '\n'),
-    iterate(T).
 
 %Reading from file
 read_file(Stream,[]) :-
@@ -108,3 +174,24 @@ o(c(X, Y)) :-
     o(X, Y).
 t(c(X, Y)) :-
     t(X, Y).
+h(c(X, Y)) :-
+    h(X, Y).
+
+main :-
+    consult('input.pl').
+    randomSearch.
+
+randomSearch.
+
+randomMove(ball(c(0, 0), s0), 0).
+randomMove(ball(C, do(A, S)), Count) :-
+    (
+        (A = up; A = down, A = left; A = right),
+        ball(C0, S0),
+        \+o(C),
+        \+h(C),
+        \+t(C),
+        Count is Count0 + 1,
+        randomDirection(C0, A),
+        randomMove(ball(C0, S0), Count0)
+    ).
