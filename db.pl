@@ -184,48 +184,45 @@ main :-
     randomSearch.
 
 randomSearch :- 
-    randomMove(ball(C, do(A, S0)), Count, Res),
-    (
-        Res = cont -> randomMove(ball())
-    )
-
+    randomMove(ball(c(1, 3), _), Count, Res),
+    write(Count).
 
 randomMove(ball(c(0, 0), s0), 0, cont).
 randomMove(ball(C, do(A, S)), Count, Res) :-
     (
         Res = cont,
         randomMove(ball(C0, S0), Count0, cont),
-        randomDirection(C0, A),
         ball(C, do(A, S0)),
+        randomDirection(C0, A),
         Count is Count0 + 1,
         (A = up; A = down; A = left; A = right),
-        \+o(C),
-        \+t(C),
-        \+h(C)
+        (
+            \+o(C), \+t(C), \+h(C) -> 
+        )
     );
     (
         Res = cont,
+        randomMove(ball(C0, S0), Count0, cont),
         randomDirection(C0, A),
         ball(C, do(A, S0)),
-        randomMove(ball(C0, S0), Count0, cont),
         Count is Count0 + 1,
         (A = up; A = down; A = left; A = right),
         o(C)
     );
     (
         Res = cont,
+        randomMove(ball(C0, S0), Count0, cont),
         randomDirection(C0, A),
         ball(C, do(A, S0)),
-        randomMove(ball(C0, S0), Count0, cont),
         Count is Count0,
         (A = up; A = down; A = left; A = right),
         h(C)
     );
     (
         Res = cont,
+        randomMove(ball(C0, S0), Count0, cont),
         randomDirection(C0, A),
         ball(C, do(A, S0)),
-        randomMove(ball(C0, S0), Count0, cont),
         Count is Count0 + 1,
         (A = up; A = down; A = left; A = right),
         t(C)
