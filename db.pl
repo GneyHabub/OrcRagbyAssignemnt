@@ -174,52 +174,66 @@ t(c(X, Y)) :-
 h(c(X, Y)) :-
     h(X, Y).
 
-h(0, 3).
-o(3, 2).
-o(1, 2).
-t(1, 3).
+% h(0, 3).
+% o(1, 2).
+% t(1, 3).
 
 main :-
-    consult('input.pl').
-    randomSearch.
-
-randomSearch :- 
-    randomMove(ball(c(0, 0), s0), 0, cont),
-    write(Res),
+    randomSearch(10000, Res, Path, 50, FinalMin, FinalPath),
+    write(FinalMin),
     nl,
-    write(Count).
+    write(FinalPath).
 
-randomMove(ball(c(1, 3), S), Count, cont).
-randomMove(ball(C, S), Count, Res) :-
+randomSearch(Min, Res, Path, 0, FinalMin, FinalPath) :-
+    FinalMin is Min,
+    FinalPath = Path.
+
+randomSearch(Min, Res, Path, Count, FinalMin, FinalPath) :- 
+    randomMove(ball(c(0, 0), s0), 0, cont, FinalCount, FinalSate, [], FinalStack),
+    Count0 is Count - 1,
+    (
+        (FinalCount < Min, FinalSate = td -> randomSearch(FinalCount, FinalSate, FinalStack, Count0, FinalMin, FinalPath));
+        (FinalCount >= Min -> randomSearch(Min, Res, Path, Count0, FinalMin, FinalPath));
+        (FinalSate \= td -> randomSearch(Min, Res, Path, Count0, FinalMin, FinalPath))
+    ).
+
+% randomMove(ball(c(1, 3), S), Count, cont, FinalCount, FinalSate).
+randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
     (
         Res = cont,
         \+o(C), \+t(C), \+h(C),
         randomDirection(C, A),
         ball(C0, do(A, S)),
         Count0 is Count + 1,
-        randomMove(ball(C0, do(A, S)), Count0, cont)
+        randomMove(ball(C0, do(A, S)), Count0, cont, FinalCount, FinalSate, [C | Stack], FinalStack)
     );
     (
         Res = cont,
         o(C),
-        randomMove(ball(C0, S), Count, orc)
+        randomMove(ball(C0, S), Count, orc,  FinalCount, FinalSate, [C | Stack], FinalStack)
     );
     (
         Res = cont,
         h(C),
         randomDirection(C, A),
         ball(C0, do(A, S)),
-        Count0 is Count + 1,
-        randomMove(ball(C0, do(A, S)), Count0, cont)
+        Count0 is Count,
+        randomMove(ball(C0, do(A, S)), Count0, cont,  FinalCount, FinalSate, [C | Stack], FinalStack)
     );
     (
         Res = cont,
         t(C),
-        randomMove(ball(C, S), Count, td)
+        randomMove(ball(C, S), Count, td,  FinalCount, FinalSate, [C | Stack], FinalStack)
     );
     (
-        Res = orc
+        Res = orc,
+        FinalCount is Count,
+        FinalSate = orc,
+        FinalStack = Stack
     );
     (
-        Res = td
+        Res = td,
+        FinalCount is Count,
+        FinalSate = td,
+        FinalStack = Stack
     ).
