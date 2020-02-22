@@ -18,12 +18,12 @@ cellRight(c(X0, Y0), c(XN, YN)) :-
     XN is X0+1, YN is Y0.
 
 noWall(c(X, Y)) :-
-    (X < 20), (X >= 0),
-    (Y < 20), (Y >= 0).
+    (X < 7), (X >= 0),
+    (Y < 7), (Y >= 0).
 
 notNearWall(c(X, Y)) :- 
-    (X < 19), (X > 0),
-    (Y < 19), (Y > 0).
+    (X < 6), (X > 0),
+    (Y < 6), (Y > 0).
 
 ballNotLost(s0).
 ballNotLost(do(A, S)) :-
@@ -80,28 +80,28 @@ randomDirection(C, AN) :-
                         Dir = 1 -> AN = right
                     )
                 );
-                X = 0, Y = 19 -> (
+                X = 0, Y = 6 -> (
                     random(0, 2, Dir),
                     (
                         Dir = 0 -> AN = down;
                         Dir = 1 -> AN = right
                     )
                 );
-                X = 19, Y = 19 -> (
+                X = 6, Y = 6 -> (
                     random(0, 2, Dir),
                     (
                         Dir = 0 -> AN = left;
                         Dir = 1 -> AN = down
                     )
                 );
-                X = 19, Y = 0 -> (
+                X = 6, Y = 0 -> (
                     random(0, 2, Dir),
                     (
                         Dir = 0 -> AN = up;
                         Dir = 1 -> AN = left
                     )
                 );
-                X = 0, Y \= 0, Y \= 19 -> (
+                X = 0, Y \= 0, Y \= 6 -> (
                     random(0, 3, Dir),
                     (
                         Dir = 0 -> AN = up, !;
@@ -109,7 +109,7 @@ randomDirection(C, AN) :-
                         (Dir = 2 -> AN = right, !)
                     )
                 );
-                X \= 0, X \= 19, Y = 0 -> (
+                X \= 0, X \= 6, Y = 0 -> (
                     random(0, 3, Dir),
                     (
                         Dir = 0 -> AN = up, !;
@@ -117,7 +117,7 @@ randomDirection(C, AN) :-
                         (Dir = 2 -> AN = right, !)
                     )
                 );
-                X = 19, Y \= 19, Y \= 0 -> (
+                X = 6, Y \= 6, Y \= 0 -> (
                     random(0, 3, Dir),
                     (
                         Dir = 0 -> AN = up, !;
@@ -125,7 +125,7 @@ randomDirection(C, AN) :-
                         (Dir = 2 -> AN = down, !)
                     )
                 );
-                X \= 19, X \= 0, Y = 19 -> (
+                X \= 6, X \= 0, Y = 6 -> (
                     random(0, 3, Dir),
                     (
                         Dir = 0 -> AN = down, !;
@@ -136,6 +136,152 @@ randomDirection(C, AN) :-
             )
         )
     ). 
+
+randomPass(C, AN) :-
+    (
+        (
+            notNearWall(C),
+            random(0, 8, Dir),
+            (
+                Dir = 0 -> AN = up;
+                Dir = 1 -> AN = down;
+                Dir = 2 -> AN = left;
+                Dir = 3 -> AN = right;
+                Dir = 4 -> AN = up_right;
+                Dir = 5 -> AN = down_right;
+                Dir = 6 -> AN = down_left;
+                Dir = 7 -> AN = up_left
+            ), !
+        );
+        (
+            \+notNearWall(C),
+            C = c(X, Y),
+            (
+                X = 0, Y = 0 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = right;
+                        Dir = 2 -> AN = up_right
+                    )
+                );
+                X = 0, Y = 6 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = down;
+                        Dir = 1 -> AN = right;
+                        Dir = 2 -> AN = down_right
+                    )
+                );
+                X = 6, Y = 6 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = left;
+                        Dir = 1 -> AN = down;
+                        Dir = 2 -> AN = down_left
+                    )
+                );
+                X = 6, Y = 0 -> (
+                    random(0, 3, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = left;
+                        Dir = 2 -> AN = up_left
+                    )
+                );
+                X = 0, Y \= 0, Y \= 6 -> (
+                    random(0, 5, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = down;
+                        Dir = 2 -> AN = right;
+                        Dir = 3 -> AN = up_right;
+                        Dir = 4 -> AN = down_right
+                    )
+                );
+                X \= 0, X \= 6, Y = 0 -> (
+                    random(0, 5, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = left;
+                        Dir = 2 -> AN = right;
+                        Dir = 3 -> AN = up_left;
+                        Dir = 4 -> AN = up_right
+                    )
+                );
+                X = 6, Y \= 6, Y \= 0 -> (
+                    random(0, 5, Dir),
+                    (
+                        Dir = 0 -> AN = up;
+                        Dir = 1 -> AN = left;
+                        Dir = 2 -> AN = down;
+                        Dir = 3 -> AN = up_left;
+                        Dir = 4 -> AN = down_left
+                    )
+                );
+                X \= 6, X \= 0, Y = 6 -> (
+                    random(0, 5, Dir),
+                    (
+                        Dir = 0 -> AN = down;
+                        Dir = 1 -> AN = left;
+                        Dir = 2 -> AN = right;
+                        Dir = 3 -> AN = down_right;
+                        Dir = 4 -> AN = down_left
+                    )
+                )
+            )
+        )
+    ).
+
+toss(c(X, Y), A, CN) :-
+    A = up -> (
+        noWall(c(X, Y + 1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y + 1), A, CN));
+        noWall(c(X, Y + 1)), o(c(X, Y)) -> (false);
+        noWall(c(X, Y + 1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X, Y + 1)) -> (false)
+    );
+    A = down -> (
+        noWall(c(X, Y - 1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y - 1), A, CN));
+        noWall(c(X, Y - 1)), o(c(X, Y)) -> (false);
+        noWall(c(X, Y - 1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X, Y - 1)) -> (false)
+    );
+    A = left -> (
+        noWall(c(X-1, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X - 1, Y), A, CN));
+        noWall(c(X-1, Y)), o(c(X, Y)) -> (false);
+        noWall(c(X-1, Y)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X-1, Y)) -> (false)
+    );
+    A = right -> (
+        noWall(c(X+1, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X+1, Y), A, CN));
+        noWall(c(X+1, Y)), o(c(X, Y)) -> (false);
+        noWall(c(X+1, Y)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X+1, Y)) -> (false)
+    );
+    A = up_right -> (
+        noWall(c(X+1, Y+1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y + 1), A, CN));
+        noWall(c(X+1, Y+1)), o(c(X, Y)) -> (false);
+        noWall(c(X+1, Y+1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X+1, Y+1)) -> (false)
+    );
+    A = down_right -> (
+        noWall(c(X+1, Y-1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X+1, Y - 1), A, CN));
+        noWall(c(X+1, Y-1)), o(c(X, Y)) -> (false);
+        noWall(c(X+1, Y-1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X+1, Y-1)) -> (false)
+    );
+    A = down_left -> (
+        noWall(c(X-1, Y-1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X-1, Y-1), A, CN));
+        noWall(c(X-1, Y-1)), o(c(X, Y)) -> (false);
+        noWall(c(X-1, Y-1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall(c(X-1, Y-1)) -> (false)
+    );
+    A = up_left -> (
+        noWall(c(X-1, Y+1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X-1, Y+1), A, CN));
+        noWall((X-1, Y+1)), o(c(X, Y)) -> (false);
+        noWall((X-1, Y+1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
+        \+noWall((X-1, Y+1)) -> (false)
+    ).
     
 %HELPERS
 %Adds element to list
@@ -173,11 +319,11 @@ t(c(X, Y)) :-
     t(X, Y).
 h(c(X, Y)) :-
     h(X, Y).
+h(0, 3).
+o(1, 2).
+t(1, 3).
 
-% h(0, 3).
-% o(1, 2).
-% t(1, 3).
-
+consult(input).
 main :-
     randomSearch(10000, Res, Path, 50, FinalMin, FinalPath),
     write(FinalMin),
@@ -197,9 +343,16 @@ randomSearch(Min, Res, Path, Count, FinalMin, FinalPath) :-
         (FinalSate \= td -> randomSearch(Min, Res, Path, Count0, FinalMin, FinalPath))
     ).
 
-% randomMove(ball(c(1, 3), S), Count, cont, FinalCount, FinalSate).
 randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
-    (
+    random(0, 4, Choose),
+    ((Choose is 0 -> (
+        Res = cont,
+        \+o(C), \+t(C), \+h(C),
+        randomPass(C, A),
+        (toss(C, A, CN) -> randomMove(ball(CN, do(A, S)), Count0, cont, FinalCount, FinalSate, ["p" | Stack], FinalStack));
+        (\+toss(C, A, CN) -> randomMove(ball(C, S), Count, lost,  FinalCount, FinalSate, [C | Stack], FinalStack))
+    ));
+    ((
         Res = cont,
         \+o(C), \+t(C), \+h(C),
         randomDirection(C, A),
@@ -236,4 +389,9 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         FinalCount is Count,
         FinalSate = td,
         FinalStack = Stack
-    ).
+    );(
+        Res = lost,
+        FinalCount is Count,
+        FinalSate = lost,
+        FinalStack = Stack
+    ))).
