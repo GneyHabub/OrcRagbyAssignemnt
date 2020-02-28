@@ -384,10 +384,15 @@ h(c(X, Y)) :-
 
 main :-
     consult(input),
-    randomSearch(10000, Res, Path, 30, FinalMin, FinalPath),
+    statistics(runtime,[Start|_]),
+    randomSearch(10000, Res, Path, 100, FinalMin, FinalPath),
+    statistics(runtime,[Stop|_]),
+    Runtime is Stop - Start,
+    write('Random Search Took '), write(Runtime), write('ms.'),
+    nl,
     write(FinalMin),
     nl,
-    write(FinalPath).
+    write(FinalPath), nl, nl.   
 
 randomSearch(Min, Res, Path, 0, FinalMin, FinalPath) :-
     FinalMin is Min,
@@ -427,7 +432,7 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         (
             Choose is 0 -> (
                 randomPass(C, A),
-                ((toss(C, A, CN) -> simulatePath(C, S, A, CN, SF), Count0 is Count + 1, randomMove(ball(CN, SF), Count0, cont, FinalCount, FinalSate, ["p" | Stack], FinalStack));
+                ((toss(C, A, CN) -> simulatePath(C, S, A, CN, SF), Count0 is Count + 2, randomMove(ball(CN, SF), Count0, cont, FinalCount, FinalSate, ['p' | Stack], FinalStack));
                 (\+toss(C, A, CN) -> randomMove(ball(C, S), Count, lost,  FinalCount, FinalSate, [C | Stack], FinalStack)))
             );
             (
@@ -457,10 +462,3 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         t(C),
         randomMove(ball(C, S), Count, td,  FinalCount, FinalSate, [C | Stack], FinalStack)
      )).
-
-     
-    ((
-        Res = cont,
-        \+o(C), \+t(C), \+h(C),
-        
-    );
