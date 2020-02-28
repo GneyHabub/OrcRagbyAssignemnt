@@ -235,52 +235,114 @@ randomPass(C, AN) :-
 
 toss(c(X, Y), A, CN) :-
     A = up -> (
-        noWall(c(X, Y + 1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y + 1), A, CN));
-        noWall(c(X, Y + 1)), o(c(X, Y)) -> (false);
-        noWall(c(X, Y + 1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X, Y + 1)) -> (false)
+        YN is Y+1, 
+        ((noWall(c(X, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, YN), A, CN)));
+        (noWall(c(X, YN)), o(c(X, Y)) -> (false));
+        (noWall(c(X, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
+        (\+noWall(c(X, YN)) -> (false)))
     );
     A = down -> (
-        noWall(c(X, Y - 1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y - 1), A, CN));
-        noWall(c(X, Y - 1)), o(c(X, Y)) -> (false);
-        noWall(c(X, Y - 1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X, Y - 1)) -> (false)
+        YN is Y - 1,
+        ((noWall(c(X, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, YN), A, CN)));
+        (noWall(c(X, YN)), o(c(X, Y)) -> (false));
+        (noWall(c(X, YN)), h(c(X, Y)) -> (CN = c(X, YN)));
+        (\+noWall(c(X, YN)) -> (false)))
     );
     A = left -> (
-        noWall(c(X-1, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X - 1, Y), A, CN));
-        noWall(c(X-1, Y)), o(c(X, Y)) -> (false);
-        noWall(c(X-1, Y)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X-1, Y)) -> (false)
+        XN is X - 1,
+        ((noWall(c(XN, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, Y), A, CN)));
+        (noWall(c(XN, Y)), o(c(X, Y)) -> (false));
+        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(XN, Y)));
+        (\+noWall(c(XN, Y)) -> (false)))
     );
     A = right -> (
-        noWall(c(X+1, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X+1, Y), A, CN));
-        noWall(c(X+1, Y)), o(c(X, Y)) -> (false);
-        noWall(c(X+1, Y)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X+1, Y)) -> (false)
+        XN is X + 1,
+        ((noWall(c(XN, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, Y), A, CN)));
+        (noWall(c(XN, Y)), o(c(X, Y)) -> (false));
+        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(XN, Y)));
+        (\+noWall(c(XN, Y)) -> (false)))
     );
     A = up_right -> (
-        noWall(c(X+1, Y+1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, Y + 1), A, CN));
-        noWall(c(X+1, Y+1)), o(c(X, Y)) -> (false);
-        noWall(c(X+1, Y+1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X+1, Y+1)) -> (false)
+        XN is X + 1,
+        YN is Y + 1,
+        ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
+        (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (\+noWall(c(XN, YN)) -> (false)))
     );
     A = down_right -> (
-        noWall(c(X+1, Y-1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X+1, Y - 1), A, CN));
-        noWall(c(X+1, Y-1)), o(c(X, Y)) -> (false);
-        noWall(c(X+1, Y-1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X+1, Y-1)) -> (false)
+        XN is X + 1,
+        YN is Y - 1,
+        ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
+        (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (\+noWall(c(XN, YN)) -> (false)))
     );
     A = down_left -> (
-        noWall(c(X-1, Y-1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X-1, Y-1), A, CN));
-        noWall(c(X-1, Y-1)), o(c(X, Y)) -> (false);
-        noWall(c(X-1, Y-1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall(c(X-1, Y-1)) -> (false)
+        XN is X - 1,
+        YN is Y - 1,
+        ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
+        (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (\+noWall(c(XN, YN)) -> (false)))
     );
     A = up_left -> (
-        noWall(c(X-1, Y+1)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X-1, Y+1), A, CN));
-        noWall((X-1, Y+1)), o(c(X, Y)) -> (false);
-        noWall((X-1, Y+1)), h(c(X, Y)) -> (CN = c(X, Y + 1));
-        \+noWall((X-1, Y+1)) -> (false)
+        XN is X - 1,
+        YN is Y + 1,
+        ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
+        (noWall((XN, YN)), o(c(X, Y)) -> (false));
+        (noWall((XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (\+noWall((XN, YN)) -> (false)))
+    ).
+
+simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- %ебучий костыль, который существует лишь потому, что я дебил и не заметил косяк раньше
+    A = up -> (
+        (Y \= YN,
+        Y0 is Y + 1,
+        simulatePath(c(X, Y0), do(up, S), A, c(XN, YN), SF));
+        (Y = YN, SF = S)
+    );
+    A = down -> (
+        (Y \= YN,
+        Y0 is Y - 1,
+        simulatePath(c(X, Y0), do(down, S), A, c(XN, YN), SF));
+        (Y = YN, SF = S)
+    );
+    A = left -> (
+        (X \= XN,
+        X0 is X - 1,
+        simulatePath(c(X0, Y), do(left, S), A, c(XN, YN), SF));
+        (X = XN, SF = S)
+    );
+    A = right -> (
+        (X \= XN,
+        X0 is X + 1,
+        simulatePath(c(X0, Y), do(right, S), A, c(XN, YN), SF));
+        (X = XN, SF = S)
+    );
+    A = up_right -> (
+        (X \= XN, Y \= YN,
+        X0 is X + 1, Y0 is Y + 1,
+        simulatePath(c(X0, Y0), do(right, do(up, S)), A, c(XN, YN), SF));
+        (X = XN, Y = YN, SF = S)
+    );
+    A = down_right -> (
+        (X \= XN, Y \= YN,
+        X0 is X + 1, Y0 is Y - 1,
+        simulatePath(c(X0, Y0), do(right, do(down, S)), A, c(XN, YN), SF));
+        (X = XN, Y = YN, SF = S)
+    );
+    A = down_left -> (
+        (X \= XN, Y \= YN,
+        X0 is X - 1, Y0 is Y - 1,
+        simulatePath(c(X0, Y0), do(left, do(down, S)), A, c(XN, YN), SF));
+        (X = XN, Y = YN, SF = S)
+    );
+    A = up_left -> (
+        (X \= XN, Y \= YN,
+        X0 is X - 1, Y0 is Y + 1,
+        simulatePath(c(X0, Y0), do(left, do(up, S)), A, c(XN, YN), SF));
+        (X = XN, Y = YN, SF = S)
     ).
     
 %HELPERS
@@ -319,13 +381,10 @@ t(c(X, Y)) :-
     t(X, Y).
 h(c(X, Y)) :-
     h(X, Y).
-h(0, 3).
-o(1, 2).
-t(1, 3).
 
-consult(input).
 main :-
-    randomSearch(10000, Res, Path, 50, FinalMin, FinalPath),
+    consult(input),
+    randomSearch(10000, Res, Path, 30, FinalMin, FinalPath),
     write(FinalMin),
     nl,
     write(FinalPath).
@@ -345,21 +404,41 @@ randomSearch(Min, Res, Path, Count, FinalMin, FinalPath) :-
 
 randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
     random(0, 4, Choose),
-    ((Choose is 0 -> (
-        Res = cont,
-        \+o(C), \+t(C), \+h(C),
-        randomPass(C, A),
-        (toss(C, A, CN) -> randomMove(ball(CN, do(A, S)), Count0, cont, FinalCount, FinalSate, ["p" | Stack], FinalStack));
-        (\+toss(C, A, CN) -> randomMove(ball(C, S), Count, lost,  FinalCount, FinalSate, [C | Stack], FinalStack))
-    ));
     ((
+        Res = orc,
+        FinalCount is Count,
+        FinalSate = orc,
+        FinalStack = Stack
+    );
+    (
+        Res = td,
+        FinalCount is Count,
+        FinalSate = td,
+        FinalStack = Stack
+    );(
+        Res = lost,
+        FinalCount is Count,
+        FinalSate = lost,
+        FinalStack = Stack
+    );
+    (
         Res = cont,
         \+o(C), \+t(C), \+h(C),
-        randomDirection(C, A),
-        ball(C0, do(A, S)),
-        Count0 is Count + 1,
-        randomMove(ball(C0, do(A, S)), Count0, cont, FinalCount, FinalSate, [C | Stack], FinalStack)
+        (
+            Choose is 0 -> (
+                randomPass(C, A),
+                ((toss(C, A, CN) -> simulatePath(C, S, A, CN, SF), Count0 is Count + 1, randomMove(ball(CN, SF), Count0, cont, FinalCount, FinalSate, ["p" | Stack], FinalStack));
+                (\+toss(C, A, CN) -> randomMove(ball(C, S), Count, lost,  FinalCount, FinalSate, [C | Stack], FinalStack)))
+            );
+            (
+                randomDirection(C, A),
+                ball(C0, do(A, S)),
+                Count0 is Count + 1,
+                randomMove(ball(C0, do(A, S)), Count0, cont, FinalCount, FinalSate, [C | Stack], FinalStack)
+            )
+        )
     );
+    
     (
         Res = cont,
         o(C),
@@ -377,21 +456,11 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         Res = cont,
         t(C),
         randomMove(ball(C, S), Count, td,  FinalCount, FinalSate, [C | Stack], FinalStack)
+     )).
+
+     
+    ((
+        Res = cont,
+        \+o(C), \+t(C), \+h(C),
+        
     );
-    (
-        Res = orc,
-        FinalCount is Count,
-        FinalSate = orc,
-        FinalStack = Stack
-    );
-    (
-        Res = td,
-        FinalCount is Count,
-        FinalSate = td,
-        FinalStack = Stack
-    );(
-        Res = lost,
-        FinalCount is Count,
-        FinalSate = lost,
-        FinalStack = Stack
-    ))).
