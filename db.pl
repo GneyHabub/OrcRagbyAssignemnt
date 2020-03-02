@@ -1,3 +1,40 @@
+%HELPERS
+%Adds element to list
+add(E,L,[E|L]).
+
+%Counts number of elements in list
+countList([],0). 
+countList([_|Tail], N) :- countList(Tail, N1), N is N1 + 1.
+
+%Check if item is on the list or not
+on_list(Item,[Item|Rest]):-
+    write(Item). 
+on_list(Item,[DisregardHead|Tail]):-
+    \+ Tail = [],
+    on_list(Item,Tail).
+
+%Reading from file
+read_file(Stream,[]) :-
+    at_end_of_stream(Stream).
+read_file(Stream,[X|L]) :-
+    \+ at_end_of_stream(Stream),
+    read(Stream,X),
+    read_file(Stream,L).
+
+%Writing to file1, X
+write_to_file(File, Text):-
+    open(File, append, Stream),
+    write(Stream, Text),
+    close(Stream).
+
+%Conver to the used format
+o(c(X, Y)) :-
+    o(X, Y).
+t(c(X, Y)) :-
+    t(X, Y).
+h(c(X, Y)) :-
+    h(X, Y).  
+
 ball(c(0, 0), s0).
 ball(C, do(A, S)) :- 
     ball(C0, S),
@@ -7,6 +44,10 @@ ball(C, do(A, S)) :-
         (A = left, cellLeft(C0, C), noWall(C));
         (A = right, cellRight(C0, C), noWall(C))
     ).
+
+h(x0, y0).
+o(x0, y0).
+t(x0, y0).
 
 cellAbove(c(X0, Y0), c(XN, YN)) :-
     XN is X0, YN is Y0+1.
@@ -18,12 +59,12 @@ cellRight(c(X0, Y0), c(XN, YN)) :-
     XN is X0+1, YN is Y0.
 
 noWall(c(X, Y)) :-
-    (X < 7), (X >= 0),
-    (Y < 7), (Y >= 0).
+    (X < 20), (X >= 0),
+    (Y < 20), (Y >= 0).
 
 notNearWall(c(X, Y)) :- 
-    (X < 6), (X > 0),
-    (Y < 6), (Y > 0).
+    (X < 19), (X > 0),
+    (Y < 19), (Y > 0).
 
 ballNotLost(s0).
 ballNotLost(do(A, S)) :-
@@ -343,56 +384,7 @@ simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- %ебучий костыль, ко
         X0 is X - 1, Y0 is Y + 1,
         simulatePath(c(X0, Y0), do(left, do(up, S)), A, c(XN, YN), SF));
         (X = XN, Y = YN, SF = S)
-    ).
-    
-%HELPERS
-%Adds element to list
-add(E,L,[E|L]).
-
-%Counts number of elements in list
-countList([],0). 
-countList([_|Tail], N) :- countList(Tail, N1), N is N1 + 1.
-
-%Check if item is on the list or not
-on_list(Item,[Item|Rest]):-
-    write(Item). 
-on_list(Item,[DisregardHead|Tail]):-
-    \+ Tail = [],
-    on_list(Item,Tail).
-
-%Reading from file
-read_file(Stream,[]) :-
-    at_end_of_stream(Stream).
-read_file(Stream,[X|L]) :-
-    \+ at_end_of_stream(Stream),
-    read(Stream,X),
-    read_file(Stream,L).
-
-%Writing to file1, X
-write_to_file(File, Text):-
-    open(File, append, Stream),
-    write(Stream, Text),
-    close(Stream).
-
-%Conver to the used format
-o(c(X, Y)) :-
-    o(X, Y).
-t(c(X, Y)) :-
-    t(X, Y).
-h(c(X, Y)) :-
-    h(X, Y).
-
-main :-
-    consult(input),
-    statistics(runtime,[Start|_]),
-    randomSearch(10000, Res, Path, 100, FinalMin, FinalPath),
-    statistics(runtime,[Stop|_]),
-    Runtime is Stop - Start,
-    write('Random Search Took '), write(Runtime), write('ms.'),
-    nl,
-    write(FinalMin),
-    nl,
-    write(FinalPath), nl, nl.   
+    ). 
 
 randomSearch(Min, Res, Path, 0, FinalMin, FinalPath) :-
     FinalMin is Min,
@@ -462,3 +454,71 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         t(C),
         randomMove(ball(C, S), Count, td,  FinalCount, FinalSate, [C | Stack], FinalStack)
      )).
+
+backtrackSearch(C, L, FL) :-
+    \+on_list(C, L),
+    ((
+        t(C),
+        FL = [C | L]
+    );
+    (
+        cellAbove(C, CN),
+        t(CN),
+        backtrackSearch(CN, [C|L], FL)
+    );
+    (
+        cellBelow(C, CN),
+        t(CN),
+        backtrackSearch(CN, [C|L], FL)
+    );
+    (
+        cellLeft(C, CN),
+        t(CN),
+        backtrackSearch(CN, [C|L], FL)
+    );
+    (
+        cellRight(C, CN),
+        t(CN),
+        backtrackSearch(CN, [C|L], FL)
+    );
+    (
+        cellAbove(C, CN),
+        noWall(CN),
+        \+o(CN),
+        backtrackSearch(CN, [C|L], FL)
+    );
+    (
+        cellBelow(C, CN),
+        noWall(CN),
+        \+o(CN),
+        backtrackSearch(CN, [C|L], FL)  
+    );
+    (
+        cellRight(C, CN),
+        noWall(CN),
+        \+o(CN),
+        backtrackSearch(CN, [C|L], FL)  
+    );
+    (
+        cellLeft(C, CN),
+        noWall(CN),
+        \+o(CN),
+        backtrackSearch(CN, [C|L], FL)  
+    )).
+
+runBTS :-
+    consult(input),
+    backtrackSearch(c(0, 0), [], FL),
+    write(FL).
+    
+main :-
+    consult(input),
+    statistics(runtime,[Start|_]),
+    randomSearch(10000, Res, Path, 100, FinalMin, FinalPath),
+    statistics(runtime,[Stop|_]),
+    Runtime is Stop - Start,
+    write('Random Search Took '), write(Runtime), write('ms.'),
+    nl,
+    write(FinalMin),
+    nl,
+    write(FinalPath), nl, nl.
