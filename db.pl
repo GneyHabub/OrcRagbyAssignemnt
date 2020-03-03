@@ -1,14 +1,11 @@
 %HELPERS
-%Adds element to list
-add(E,L,[E|L]).
 
 %Counts number of elements in list
 countList([],0). 
 countList([_|Tail], N) :- countList(Tail, N1), N is N1 + 1.
 
 %Check if item is on the list or not
-on_list(Item,[Item|Rest]):-
-    write(Item). 
+on_list(Item,[Item|Rest]).
 on_list(Item,[DisregardHead|Tail]):-
     \+ Tail = [],
     on_list(Item,Tail).
@@ -62,42 +59,16 @@ noWall(c(X, Y)) :-
     (X < 20), (X >= 0),
     (Y < 20), (Y >= 0).
 
-notNearWall(c(X, Y)) :- 
+notNearWall(c(X, Y)) :-
     (X < 19), (X > 0),
     (Y < 19), (Y > 0).
-
-ballNotLost(s0).
-ballNotLost(do(A, S)) :-
-    ballNotLost(S),
-    ball(C, do(A, S)),
-    \+o(C).
-
-canPass(s0).
-canPass(do(A, S)) :-
-    canPass(S);
-    A = pass -> false.
-
-touchDown(s0) :- false.
-touchDown(do(A, S)) :- 
-    (ball(C, do(A, S)),
-    t(C)).
-
-orcNearBy(S) :-
-    ball(C, S),
-    o(CN),
-    isAdjacent(C, CN).
-
-visited(c(0, 0), s0).
-visited(C, do(A, S)) :- 
-    ball(C, do(A, S)); 
-    visited(C, S).
 
 isAdjacent(C, CN) :-
     cellRight(C, CN);
     cellBelow(C, CN);
     cellAbove(C, CN);
     cellLeft(C, CN).
-
+%------------------------------------Random------------------------------------
 randomDirection(C, AN) :-
     (
         (
@@ -286,21 +257,21 @@ toss(c(X, Y), A, CN) :-
         YN is Y - 1,
         ((noWall(c(X, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, YN), A, CN)));
         (noWall(c(X, YN)), o(c(X, Y)) -> (false));
-        (noWall(c(X, YN)), h(c(X, Y)) -> (CN = c(X, YN)));
+        (noWall(c(X, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(X, YN)) -> (false)))
     );
     A = left -> (
         XN is X - 1,
         ((noWall(c(XN, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, Y), A, CN)));
         (noWall(c(XN, Y)), o(c(X, Y)) -> (false));
-        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(XN, Y)));
+        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(XN, Y)) -> (false)))
     );
     A = right -> (
         XN is X + 1,
         ((noWall(c(XN, Y)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, Y), A, CN)));
         (noWall(c(XN, Y)), o(c(X, Y)) -> (false));
-        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(XN, Y)));
+        (noWall(c(XN, Y)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(XN, Y)) -> (false)))
     );
     A = up_right -> (
@@ -308,7 +279,7 @@ toss(c(X, Y), A, CN) :-
         YN is Y + 1,
         ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
         (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
-        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(XN, YN)) -> (false)))
     );
     A = down_right -> (
@@ -316,7 +287,7 @@ toss(c(X, Y), A, CN) :-
         YN is Y - 1,
         ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
         (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
-        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(XN, YN)) -> (false)))
     );
     A = down_left -> (
@@ -324,7 +295,7 @@ toss(c(X, Y), A, CN) :-
         YN is Y - 1,
         ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
         (noWall(c(XN, YN)), o(c(X, Y)) -> (false));
-        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (noWall(c(XN, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall(c(XN, YN)) -> (false)))
     );
     A = up_left -> (
@@ -332,11 +303,11 @@ toss(c(X, Y), A, CN) :-
         YN is Y + 1,
         ((noWall(c(XN, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(XN, YN), A, CN)));
         (noWall((XN, YN)), o(c(X, Y)) -> (false));
-        (noWall((XN, YN)), h(c(X, Y)) -> (CN = c(XN, YN)));
+        (noWall((XN, YN)), h(c(X, Y)) -> (CN = c(X, Y)));
         (\+noWall((XN, YN)) -> (false)))
     ).
 
-simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- %ебучий костыль, который существует лишь потому, что я дебил и не заметил косяк раньше
+simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- 
     A = up -> (
         (Y \= YN,
         Y0 is Y + 1,
@@ -454,71 +425,149 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         t(C),
         randomMove(ball(C, S), Count, td,  FinalCount, FinalSate, [C | Stack], FinalStack)
      )).
-
-backtrackSearch(C, L, FL) :-
-    \+on_list(C, L),
+%------------------------------------BTS------------------------------------
+backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
+    \+on_list(c(X, Y), L),
     ((
-        t(C),
-        FL = [C | L]
+        t(c(X, Y)),
+        FL = [c(X, Y) | L],
+        FCount = Count
     );
     (
-        cellAbove(C, CN),
+        toss(c(X, Y + 1), up, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X, Y - 1), down, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X-1, Y), left, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X+1, Y), right, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X-1, Y+1), up_left, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X-1, Y-1), down_left, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X+1, Y+1), up_right, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        toss(c(X+1, Y-1), down_right, CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+    );
+    (
+        cellAbove(c(X, Y), CN),
         t(CN),
-        backtrackSearch(CN, [C|L], FL)
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellBelow(C, CN),
+        cellBelow(c(X, Y), CN),
         t(CN),
-        backtrackSearch(CN, [C|L], FL)
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellLeft(C, CN),
+        cellLeft(c(X, Y), CN),
         t(CN),
-        backtrackSearch(CN, [C|L], FL)
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellRight(C, CN),
+        cellRight(c(X, Y), CN),
         t(CN),
-        backtrackSearch(CN, [C|L], FL)
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellAbove(C, CN),
+        cellAbove(c(X, Y), CN),
+        h(CN),
+        CountN is Count,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+    );
+    (
+        cellBelow(c(X, Y), CN),
+        h(CN),
+        CountN is Count,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+    );
+    (
+        cellLeft(c(X, Y), CN),
+        h(CN),
+        CountN is Count,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+    );
+    (
+        cellRight(c(X, Y), CN),
+        h(CN),
+        CountN is Count,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+    );
+    (
+        cellAbove(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
-        backtrackSearch(CN, [C|L], FL)
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellBelow(C, CN),
+        cellBelow(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
-        backtrackSearch(CN, [C|L], FL)  
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     );
     (
-        cellRight(C, CN),
+        cellRight(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
-        backtrackSearch(CN, [C|L], FL)  
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     );
     (
-        cellLeft(C, CN),
+        cellLeft(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
-        backtrackSearch(CN, [C|L], FL)  
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     )).
-
-runBTS :-
-    consult(input),
-    backtrackSearch(c(0, 0), [], FL),
-    write(FL).
     
 main :-
     consult(input),
     statistics(runtime,[Start|_]),
-    randomSearch(10000, Res, Path, 100, FinalMin, FinalPath),
+    randomSearch(1000000, Res, Path, 100, FinalMin, FinalPath),
     statistics(runtime,[Stop|_]),
     Runtime is Stop - Start,
+    nl, nl,
     write('Random Search Took '), write(Runtime), write('ms.'),
     nl,
     write(FinalMin),
     nl,
-    write(FinalPath), nl, nl.
+    write(FinalPath), nl, nl,
+    statistics(runtime,[StartN|_]),
+    backtrackSearch(c(0, 0), [], 0, FL, FCount),
+    statistics(runtime,[StopN|_]),
+    RuntimeN is StopN - StartN,
+    write('BTS Took '), write(RuntimeN), write('ms.'),
+    nl,
+    write(FCount),
+    nl,
+    write(FL), nl, nl.
