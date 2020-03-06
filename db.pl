@@ -21,9 +21,16 @@ colisions(L1, L2, Count, FCount) :-
         )
     ).
 
-%FIXME: join two sets
-join(L1, L2, LN, LF) :-
-
+%Join two sets (no repetitions)
+join(L1, L2, LF) :-
+    (L1 = [], LF = L2);
+    (
+        L1 = [H|T],
+        (
+            \+on_list(H, L2) -> (LN = [H|L2], join(T, LN, LF));
+            on_list(H, L2) -> (join(T, L2, LF))
+        )
+    ).
 
 %Reading from file
 read_file(Stream,[]) :-
@@ -57,9 +64,9 @@ ball(C, do(A, S)) :-
         (A = right, cellRight(C0, C), noWall(C))
     ).
 
+t(x0, y0).
 h(x0, y0).
 o(x0, y0).
-t(x0, y0).
 
 cellAbove(c(X0, Y0), c(XN, YN)) :-
     XN is X0, YN is Y0+1.
@@ -477,42 +484,42 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
     (
         toss(c(X, Y + 1), up, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X, Y - 1), down, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X-1, Y), left, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X+1, Y), right, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X-1, Y+1), up_left, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X-1, Y-1), down_left, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X+1, Y+1), up_right, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         toss(c(X+1, Y-1), down_right, CN),
         CountN is Count + 1,
-        backtrackSearch(CN, ['p'|L], CountN, FL, FCount)
+        backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
         cellAbove(c(X, Y), CN),
@@ -546,7 +553,7 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellBelow(c(X, Y), CN),
+        cellLeft(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
         CountN is Count + 1,
@@ -560,14 +567,14 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     );
     (
-        cellLeft(c(X, Y), CN),
+        cellBelow(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
         CountN is Count + 1,
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     )).
     
-%------------------------------------A-Star------------------------------------
+%------------------------------------A_Star------------------------------------
 listAdjacent(C, List, Count, FList) :-
     Count is 0 -> (
         C = c(X, Y),
@@ -602,35 +609,37 @@ listAdjacent(C, List, Count, FList) :-
         ) 
     ).
 
-chooseBestRec(C, Adj, Discovered, CF, Min, CMin) :-
+chooseBestRec(C, Adj, Discovered, CF, Max, CMin) :-
     (
         Adj = [],
         listAdjacent(C, [], 0, AdjN),
         colisions(AdjN, Discovered, 0, Coll),
+        countList(AdjN, AdjLen),
         (
-            (Coll < Min) -> (CF = C);
-            (Coll >= Min) -> (CF = CMin)
+            (AdjLen - Coll > Max), \+o(C) -> (CF = C);
+            (CF = CMin)
         )
     );
     (
         listAdjacent(C, [], 0, AdjN),
         colisions(AdjN, Discovered, 0, Coll),
+        countList(AdjN, AdjLen),
         (
-            (Coll < Min) -> (Adj = [CN|T], chooseBestRec(CN, T, Discovered, CF, Coll, C));
-            (Coll >= Min) -> (Adj = [CN|T], chooseBestRec(CN, T, Discovered, CF, Min, CMin))
+            (AdjLen - Coll > Max), \+o(C) -> CollN is AdjLen - Coll, (Adj = [CN|T], chooseBestRec(CN, T, Discovered, CF, CollN, C));
+            (Adj = [CN|T], chooseBestRec(CN, T, Discovered, CF, Max, CMin))
         )
     ).
-%TODO:
+
 chooseBest(C, Discovered, CN) :- 
     listAdjacent(C, [], 0, Adj),
     Adj = [H|T],
-    chooseBestRec(H, T, Discovered, CF, 100000, C),
+    chooseBestRec(H, T, Discovered, CF, 0, C),
     CN = CF.
-
 
 aStarSearch(c(X, Y), L, Count, Discovered, FL, FCount) :-
     \+on_list(c(X, Y), L),
-    listAdjacent(c(X, Y), 0, [], Adj),
+    listAdjacent(c(X, Y), [], 0, Adj),
+    join(Discovered, Adj, DiscoveredN),
     ((
         t(c(X, Y)),
         FL = [c(X, Y) | L],
@@ -640,121 +649,106 @@ aStarSearch(c(X, Y), L, Count, Discovered, FL, FCount) :-
         cellAbove(c(X, Y), CN),
         t(CN),
         CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellBelow(c(X, Y), CN),
         t(CN),
         CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellLeft(c(X, Y), CN),
         t(CN),
         CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellRight(c(X, Y), CN),
         t(CN),
         CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X, Y + 1), up, CN),
+        YN is Y + 1,
+        toss(c(X, YN), up, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X, Y - 1), down, CN),
+        YN is Y - 1,
+        toss(c(X, YN), down, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X-1, Y), left, CN),
+        XN is X - 1,
+        toss(c(XN, Y), left, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X+1, Y), right, CN),
+        XN is X + 1,
+        toss(c(XN, Y), right, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X-1, Y+1), up_left, CN),
+        XN is X - 1,
+        YN is Y + 1,
+        toss(c(XN, YN), up_left, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X-1, Y-1), down_left, CN),
+        XN is X - 1,
+        YN is Y - 1,
+        toss(c(XN, YN), down_left, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X+1, Y+1), up_right, CN),
+        XN is X + 1,
+        YN is Y + 1,
+        toss(c(XN, YN), up_right, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        toss(c(X+1, Y-1), down_right, CN),
+        XN is X + 1,
+        YN is Y - 1,
+        toss(c(XN, YN), down_right, CN),
         CountN is Count + 1,
-        aStarSearch(CN, ['p'|L], CountN, FL, FCount)
+        aStarSearch(CN, ['p', c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellAbove(c(X, Y), CN),
         h(CN),
         CountN is Count,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellBelow(c(X, Y), CN),
         h(CN),
         CountN is Count,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellLeft(c(X, Y), CN),
         h(CN),
         CountN is Count,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
         cellRight(c(X, Y), CN),
         h(CN),
         CountN is Count,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     );
     (
-        chooseBest(c(X, Y), Discovered, CN),
-
-    )
-    (
-        cellAbove(c(X, Y), CN),
-        noWall(CN),
-        \+o(CN),
+        chooseBest(c(X, Y), DiscoveredN, CN),
         CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
-    );
-    (
-        cellBelow(c(X, Y), CN),
-        noWall(CN),
-        \+o(CN),
-        CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
-    );
-    (
-        cellRight(c(X, Y), CN),
-        noWall(CN),
-        \+o(CN),
-        CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
-    );
-    (
-        cellLeft(c(X, Y), CN),
-        noWall(CN),
-        \+o(CN),
-        CountN is Count + 1,
-        aStarSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
+        aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     )).
 
 
@@ -778,4 +772,13 @@ main :-
     nl,
     write(FCount),
     nl,
-    write(FL), nl, nl.
+    write(FL), nl, nl,
+    statistics(runtime,[StartAStar|_]),
+    aStarSearch(c(0, 0), [], 0, [c(0, 0)], Fin, FinC),
+    statistics(runtime,[StopAStar|_]),
+    RuntimeAStar is StopAStar - StartAStar,
+    write('A-Star Took '), write(RuntimeAStar), write('ms.'),
+    nl,
+    write(FinC),
+    nl,
+    write(Fin), nl, nl.
