@@ -32,20 +32,6 @@ join(L1, L2, LF) :-
         )
     ).
 
-%Reading from file
-read_file(Stream,[]) :-
-    at_end_of_stream(Stream).
-read_file(Stream,[X|L]) :-
-    \+ at_end_of_stream(Stream),
-    read(Stream,X),
-    read_file(Stream,L).
-
-%Writing to file1, X
-write_to_file(File, Text):-
-    open(File, append, Stream),
-    write(Stream, Text),
-    close(Stream).
-
 %Conver to the used format
 o(c(X, Y)) :-
     o(X, Y).
@@ -55,7 +41,7 @@ h(c(X, Y)) :-
     h(X, Y).  
 
 ball(c(0, 0), s0).
-ball(C, do(A, S)) :- 
+ball(C, do(A, S)) :- % Given a previous state and an action on this state, calculate the current state
     ball(C0, S),
     (
         (A = up, cellAbove(C0, C), noWall(C));
@@ -64,10 +50,12 @@ ball(C, do(A, S)) :-
         (A = right, cellRight(C0, C), noWall(C))
     ).
 
+% Definition
 t(x0, y0).
 h(x0, y0).
 o(x0, y0).
 
+% Calculate location of a new cell
 cellAbove(c(X0, Y0), c(XN, YN)) :-
     XN is X0, YN is Y0+1.
 cellBelow(c(X0, Y0), c(XN, YN)) :-
@@ -77,14 +65,16 @@ cellLeft(c(X0, Y0), c(XN, YN)) :-
 cellRight(c(X0, Y0), c(XN, YN)) :-
     XN is X0+1, YN is Y0.
 
+% Define borders of a map
 noWall(c(X, Y)) :-
-    (X < 20), (X >= 0),
-    (Y < 20), (Y >= 0).
+    (X < 10), (X >= 0),
+    (Y < 10), (Y >= 0).
 
 notNearWall(c(X, Y)) :-
-    (X < 19), (X > 0),
-    (Y < 19), (Y > 0).
+    (X < 9), (X > 0),
+    (Y < 9), (Y > 0).
 
+% Check if two cells are adjacent
 isAdjacent(C, CN) :-
     cellRight(C, CN);
     cellBelow(C, CN);
@@ -92,11 +82,11 @@ isAdjacent(C, CN) :-
     cellLeft(C, CN).
 
 %------------------------------------Random------------------------------------
-randomDirection(C, AN) :-
+randomDirection(C, AN) :- % Given a point on a map, generate a possible random direction from this point
     (
         (
             notNearWall(C),
-            random(0, 4, Dir),
+            random(0, 4, Dir), % Generate a random number
             (
                 Dir = 0 -> AN = up;
                 Dir = 1 -> AN = down;
@@ -172,7 +162,7 @@ randomDirection(C, AN) :-
         )
     ). 
 
-randomPass(C, AN) :-
+randomPass(C, AN) :- % Generate random direction for a pass
     (
         (
             notNearWall(C),
@@ -268,7 +258,7 @@ randomPass(C, AN) :-
         )
     ).
 
-toss(c(X, Y), A, CN) :-
+toss(c(X, Y), A, CN) :- % Ray tracking algorithm for pass validation
     A = up -> (
         YN is Y+1, 
         ((noWall(c(X, YN)), \+o(c(X, Y)), \+h(c(X, Y)) -> (toss(c(X, YN), A, CN)));
@@ -330,7 +320,7 @@ toss(c(X, Y), A, CN) :-
         (\+noWall((XN, YN)) -> (false)))
     ).
 
-simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- 
+simulatePath(c(X, Y), S, A, c(XN, YN), SF) :- % kostyl))))
     A = up -> (
         (Y \= YN,
         Y0 is Y + 1,
@@ -380,7 +370,8 @@ simulatePath(c(X, Y), S, A, c(XN, YN), SF) :-
         (X = XN, Y = YN, SF = S)
     ). 
 
-randomSearch(Min, Res, Path, 0, FinalMin, FinalPath) :-
+% Main random search function 
+randomSearch(Min, Res, Path, 0, FinalMin, FinalPath) :- 
     FinalMin is Min,
     FinalPath = Path.
 
@@ -393,6 +384,7 @@ randomSearch(Min, Res, Path, Count, FinalMin, FinalPath) :-
         (FinalSate \= td -> randomSearch(Min, Res, Path, Count0, FinalMin, FinalPath))
     ).
 
+% Function that generates randon path until it dies or reaches touchdown
 randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
     random(0, 4, Choose),
     ((
@@ -416,13 +408,13 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
         Res = cont,
         \+o(C), \+t(C), \+h(C),
         (
-            Choose is 0 -> (
+            Choose is 0 -> ( % If it is a pass, then pass
                 randomPass(C, A),
                 ((toss(C, A, CN) -> simulatePath(C, S, A, CN, SF), Count0 is Count + 2, randomMove(ball(CN, SF), Count0, cont, FinalCount, FinalSate, ['p' | Stack], FinalStack));
                 (\+toss(C, A, CN) -> randomMove(ball(C, S), Count, lost,  FinalCount, FinalSate, [C | Stack], FinalStack)))
             );
             (
-                randomDirection(C, A),
+                randomDirection(C, A), % Make a move otherwise
                 ball(C0, do(A, S)),
                 Count0 is Count + 1,
                 randomMove(ball(C0, do(A, S)), Count0, cont, FinalCount, FinalSate, [C | Stack], FinalStack)
@@ -450,7 +442,7 @@ randomMove(ball(C, S), Count, Res, FinalCount, FinalSate, Stack, FinalStack) :-
      )).
 
 %------------------------------------BTS------------------------------------
-backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
+backtrackSearch(c(X, Y), L, Count, FL, FCount) :- % Main backtracking function
     \+on_list(c(X, Y), L),
     ((
         t(c(X, Y)),
@@ -482,42 +474,54 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X, Y + 1), up, CN),
+        YN is Y + 1,
+        toss(c(X, YN), up, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X, Y - 1), down, CN),
+        YN is Y - 1,
+        toss(c(X, YN), down, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X-1, Y), left, CN),
+        XN is X - 1,
+        toss(c(XN, Y), left, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X+1, Y), right, CN),
+        XN is X + 1,
+        toss(c(XN, Y), right, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X-1, Y+1), up_left, CN),
+        XN is X - 1,
+        YN is Y + 1,
+        toss(c(XN, YN), up_left, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X-1, Y-1), down_left, CN),
+        XN is X - 1,
+        YN is Y - 1,
+        toss(c(XN, YN), down_left, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X+1, Y+1), up_right, CN),
+        XN is X + 1,
+        YN is Y + 1,
+        toss(c(XN, YN), up_right, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
     (
-        toss(c(X+1, Y-1), down_right, CN),
+        XN is X + 1,
+        YN is Y - 1,
+        toss(c(XN, YN), down_right, CN),
         CountN is Count + 1,
         backtrackSearch(CN, ['p', c(X,Y)|L], CountN, FL, FCount)
     );
@@ -546,13 +550,6 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
     );
     (
-        cellAbove(c(X, Y), CN),
-        noWall(CN),
-        \+o(CN),
-        CountN is Count + 1,
-        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
-    );
-    (
         cellLeft(c(X, Y), CN),
         noWall(CN),
         \+o(CN),
@@ -566,6 +563,14 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
         CountN is Count + 1,
         backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)  
     );
+    (
+        cellAbove(c(X, Y), CN),
+        noWall(CN),
+        \+o(CN),
+        CountN is Count + 1,
+        backtrackSearch(CN, [c(X, Y)|L], CountN, FL, FCount)
+    );
+
     (
         cellBelow(c(X, Y), CN),
         noWall(CN),
@@ -575,7 +580,7 @@ backtrackSearch(c(X, Y), L, Count, FL, FCount) :-
     )).
     
 %------------------------------------A_Star------------------------------------
-listAdjacent(C, List, Count, FList) :-
+listAdjacent(C, List, Count, FList) :- % List all adjacent cells to a given cell
     Count is 0 -> (
         C = c(X, Y),
         cellAbove(C, CA),
@@ -609,7 +614,7 @@ listAdjacent(C, List, Count, FList) :-
         ) 
     ).
 
-chooseBestRec(C, Adj, Discovered, CF, Max, CMin) :-
+chooseBestRec(C, Adj, Discovered, CF, Max, CMin) :- % Choose a cell that will explore the most number of points to us
     (
         Adj = [],
         listAdjacent(C, [], 0, AdjN),
@@ -636,7 +641,7 @@ chooseBest(C, Discovered, CN) :-
     chooseBestRec(H, T, Discovered, CF, 0, C),
     CN = CF.
 
-aStarSearch(c(X, Y), L, Count, Discovered, FL, FCount) :-
+aStarSearch(c(X, Y), L, Count, Discovered, FL, FCount) :- % Main Heuristic backtracking algorithm
     \+on_list(c(X, Y), L),
     listAdjacent(c(X, Y), [], 0, Adj),
     join(Discovered, Adj, DiscoveredN),
@@ -751,9 +756,9 @@ aStarSearch(c(X, Y), L, Count, Discovered, FL, FCount) :-
         aStarSearch(CN, [c(X, Y)|L], CountN, DiscoveredN, FL, FCount)
     )).
 
-
 main :-
     consult(input),
+    \+o(0, 0), % CHeck if it is an impossible map
     statistics(runtime,[StartRand|_]),
     randomSearch(1000000, Res, Path, 100, FinalMin, FinalPath),
     statistics(runtime,[StopRand|_]),
